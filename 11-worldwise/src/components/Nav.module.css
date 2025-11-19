@@ -1,0 +1,9 @@
+.nav {
+}
+
+.nav li {
+  list-style: disc;
+  display: flex;
+  justify-content: space-between;
+  background-color: orange;
+}
