@@ -3,8 +3,10 @@ import CityItem from "./CityItem";
 import styles from "./CityList.module.css";
 import Spinner from "./Spinner";
 import Message from "./Message";
+import { useCity } from "../contexts/CityContext";
 
-function CityList({ isLoading, cities }) {
+function CityList() {
+  const { isLoading, cities } = useCity();
   if (isLoading) return <Spinner />;
 
   if (!cities.length) return <Message message={"Please add new cities!🦓"} />;
