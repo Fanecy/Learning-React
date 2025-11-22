@@ -10,3 +10,8 @@
   align-content: start;
   gap: 1.6rem;
 }
+
+/* 滚动条整体宽度（可选，设为 0 可完全隐藏） */
+::-webkit-scrollbar {
+  width: 6px; /* 右侧滚动条宽度，设为 0 则隐藏 */
+}
