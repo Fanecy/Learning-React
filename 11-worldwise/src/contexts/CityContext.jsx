@@ -29,11 +29,45 @@ function CityProvider({ children }) {
   async function getCity(id) {
     try {
       setIsLoading(true);
-      const json = await fetch(`${BASE_URL}/cities/${id}`);
-      const data = await json.json();
+      const res = await fetch(`${BASE_URL}/cities/${id}`);
+      const data = await res.json();
       setCurrentCity(data);
     } catch {
       alert("Wrong with city loading.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function createCity(newCity) {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`${BASE_URL}/cities/`, {
+        method: "POST",
+        body: JSON.stringify(newCity),
+        header: { "content-type": "application/json" },
+      });
+      const data = await res.json();
+
+      setCities((cities) => [...cities, data]);
+    } catch {
+      alert("Wrong with city adding.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function deleteCity(id) {
+    try {
+      setIsLoading(true);
+      // eslint-disable-next-line no-unused-vars
+      const res = await fetch(`${BASE_URL}/cities/${id}`, {
+        method: "DELETE",
+      });
+
+      setCities(cities.filter((city) => city.id !== id));
+    } catch {
+      alert("Wrong with city deleting.");
     } finally {
       setIsLoading(false);
     }
@@ -48,6 +82,8 @@ function CityProvider({ children }) {
         setIsLoading,
         getCity,
         currentCity,
+        createCity,
+        deleteCity,
       }}
     >
       {children}
