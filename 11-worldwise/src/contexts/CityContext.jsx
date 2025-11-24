@@ -1,25 +1,60 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState, createContext, useContext } from "react";
+import { useEffect, createContext, useContext, useReducer } from "react";
 const BASE_URL = "http://localhost:8000";
 
 const CityContext = createContext();
 
+const initState = { cities: [], isLoading: false, currentCity: {}, error: "" };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "cities/loading":
+      return { ...state, isLoading: true };
+    case "cities/loaded":
+      return { ...state, isLoading: false, cities: action.payload };
+    case "city/loaded":
+      return { ...state, isLoading: false, currentCity: action.payload };
+    case "cities/created":
+      return {
+        ...state,
+        isLoading: false,
+        cities: [...state.cities, action.payload],
+      };
+    case "cities/deleted":
+      return {
+        ...state,
+        isLoading: false,
+        cities: state.cities.filter((city) => city.id !== action.payload),
+      };
+
+    case "cities/rejected":
+      return { ...state, isLoading: false, error: action.payload };
+    default:
+      throw new Error("Reducer unknown type");
+  }
+}
+
 function CityProvider({ children }) {
-  const [cities, setCities] = useState([]);
+  const [
+    { cities, isLoading, currentCity, setCities, setIsLoading },
+    dispatch,
+  ] = useReducer(reducer, initState);
+  /* const [cities, setCities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentCity, setCurrentCity] = useState({});
+  const [currentCity, setCurrentCity] = useState({}); */
 
   useEffect(function () {
     async function fetchCities() {
       try {
-        setIsLoading(true);
+        dispatch({ type: "cities/loading" });
         const json = await fetch(`${BASE_URL}/cities`);
         const data = await json.json();
-        setCities(data);
+        dispatch({ type: "cities/loaded", payload: data });
       } catch {
-        alert("Wrong with city loading.");
-      } finally {
-        setIsLoading(false);
+        dispatch({
+          type: "cities/rejected",
+          payload: "Something wrong with fetching cities",
+        });
       }
     }
 
@@ -27,21 +62,23 @@ function CityProvider({ children }) {
   }, []);
 
   async function getCity(id) {
+    if (Number(id) === currentCity.id) return;
     try {
-      setIsLoading(true);
+      dispatch({ type: "cities/loading" });
       const res = await fetch(`${BASE_URL}/cities/${id}`);
       const data = await res.json();
-      setCurrentCity(data);
+      dispatch({ type: "city/loaded", payload: data });
     } catch {
-      alert("Wrong with city loading.");
-    } finally {
-      setIsLoading(false);
+      dispatch({
+        type: "cities/rejected",
+        payload: "Something wrong with fetching  city",
+      });
     }
   }
 
   async function createCity(newCity) {
     try {
-      setIsLoading(true);
+      dispatch({ type: "cities/loading" });
       const res = await fetch(`${BASE_URL}/cities/`, {
         method: "POST",
         body: JSON.stringify(newCity),
@@ -49,27 +86,29 @@ function CityProvider({ children }) {
       });
       const data = await res.json();
 
-      setCities((cities) => [...cities, data]);
+      dispatch({ type: "cities/created", payload: data });
     } catch {
-      alert("Wrong with city adding.");
-    } finally {
-      setIsLoading(false);
+      dispatch({
+        type: "cities/rejected",
+        payload: "Something wrong with city creating city",
+      });
     }
   }
 
   async function deleteCity(id) {
     try {
-      setIsLoading(true);
+      dispatch({ type: "cities/loading" });
       // eslint-disable-next-line no-unused-vars
       const res = await fetch(`${BASE_URL}/cities/${id}`, {
         method: "DELETE",
       });
 
-      setCities(cities.filter((city) => city.id !== id));
+      dispatch({ type: "cities/deleted", payload: id });
     } catch {
-      alert("Wrong with city deleting.");
-    } finally {
-      setIsLoading(false);
+      dispatch({
+        type: "cities/rejected",
+        payload: "Something wrong with deleting city",
+      });
     }
   }
 
