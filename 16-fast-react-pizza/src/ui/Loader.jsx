@@ -1,5 +1,9 @@
 function Loader() {
-  return <div className="loader"></div>;
+  return (
+    <div className="spinnerContainer">
+      <div className="spinner">Loading...</div>
+    </div>
+  );
 }
 
 export default Loader;

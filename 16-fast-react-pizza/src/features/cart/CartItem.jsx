@@ -1,6 +1,8 @@
+import { formatCurrency } from "../../utils/helpers";
+
 /* eslint-disable react/prop-types */
 function CartItem({ item }) {
-  const { pizzaId, name, quantity, totalPrice } = item;
+  const { /* pizzaId */ name, quantity, totalPrice } = item;
 
   return (
     <li>

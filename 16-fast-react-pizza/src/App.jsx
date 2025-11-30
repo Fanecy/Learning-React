@@ -2,9 +2,11 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./ui/Home.jsx";
 import Menu, { Loader as menuLoader } from "./features/menu/Menu.jsx";
 import Cart from "./features/cart/Cart.jsx";
-import Order from "./features/order/Order.jsx";
+import Order, { Loader as orderLoader } from "./features/order/Order.jsx";
 import CreateUser from "./features/user/CreateUser.jsx";
-import CreateOrder from "./features/order/CreateOrder.jsx";
+import CreateOrder, {
+  action as createOrderAction,
+} from "./features/order/CreateOrder.jsx";
 import WebLayout from "./ui/WebLayout.jsx";
 import Error from "./ui/Error";
 
@@ -22,8 +24,17 @@ const router = createBrowserRouter([
         errorElement: <Error />,
       },
       { path: "/cart", element: <Cart /> },
-      { path: "/order/:orderId", element: <Order /> },
-      { path: "/order/create", element: <CreateOrder /> },
+      {
+        path: "/order/:orderId",
+        element: <Order />,
+        errorElement: <Error />,
+        loader: orderLoader,
+      },
+      {
+        path: "/order/new",
+        element: <CreateOrder />,
+        action: createOrderAction,
+      },
       { path: "/user", element: <CreateUser /> },
     ],
   },
