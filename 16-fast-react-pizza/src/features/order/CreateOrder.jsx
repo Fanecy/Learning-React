@@ -1,9 +1,12 @@
 /* import { useState } from "react";
  */
 // https://uibakery.io/regex-library/phone-number
+
+import Button from "../../ui/Button";
+
 const isValidPhone = (str) =>
   /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/.test(
-    str
+    str,
   );
 
 const fakeCart = [
@@ -32,6 +35,7 @@ const fakeCart = [
 
 import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
 import { createOrder } from "../../services/apiRestaurant";
+import { useSelector } from "react-redux";
 
 function CreateOrder() {
   /*   const [withPriority, setWithPriority] = useState(false); */
@@ -40,36 +44,59 @@ function CreateOrder() {
   const isSubmitting = navigation.state === "submitting";
   const errors = useActionData();
 
+  const userName = useSelector((state) => state.User.userName);
+
   return (
-    <div>
+    <div className="px-4 py-6">
       {/* eslint-disable-next-line react/no-unescaped-entities */}
-      <h2>Ready to order? Let's go!</h2>
+      <h2 className="mb-8 text-xl font-semibold">Ready to order? Let's go!</h2>
       <Form method="POST">
-        <div>
-          <label>First Name</label>
-          <input type="text" name="customer" required />
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label className="sm:basis-36">First Name</label>
+          <input
+            type="text"
+            name="customer"
+            defaultValue={userName}
+            required
+            className="input"
+          />
         </div>
 
-        <div>
-          <label>Phone number</label>
-          <div>
-            <input type="tel" name="phone" required />
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label className="sm:basis-36">Phone number</label>
+          <div className="grow">
+            <input
+              type="tel"
+              name="phone"
+              required
+              className="input w-full sm:w-auto"
+            />
           </div>
-          {errors?.phone && <em>{errors.phone}</em>}
+          {errors?.phone && (
+            <em className="mr-56 rounded-lg bg-red-400 p-2 text-xs text-red-700 sm:my-2">
+              {errors.phone}
+            </em>
+          )}
         </div>
 
-        <div>
-          <label>Address</label>
-          <div>
-            <input type="text" name="address" required />
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <label className="sm:basis-36">Address</label>
+          <div className="grow">
+            <input
+              type="text"
+              name="address"
+              required
+              className="input w-full sm:w-auto"
+            />
           </div>
         </div>
 
-        <div>
+        <div className="mb-8 flex items-center gap-4">
           <input
             type="checkbox"
             name="priority"
             id="priority"
+            className="h-4 w-4 accent-yellow-400"
             /*             value={withPriority}
             onChange={(e) => setWithPriority(e.target.checked)} */
           />
@@ -78,15 +105,16 @@ function CreateOrder() {
 
         <div>
           <input type="hidden" value={JSON.stringify(cart)} name="cart" />
-          <button disabled={isSubmitting}>
+          <Button type={"primary"}>
             {isSubmitting ? "Submitting Order..." : "Order now"}
-          </button>
+          </Button>
         </div>
       </Form>
     </div>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export async function action({ request }) {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);

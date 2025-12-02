@@ -4,14 +4,14 @@ import UserName from "../features/user/UserName";
 
 function Header() {
   return (
-    <div className="text-stone-700 bg-yellow-500 uppercase px-4 py-3 border-b border-stone-400">
+    <div className="flex items-center justify-between border-b border-stone-400 bg-yellow-500 px-4 py-3 uppercase text-stone-700">
       <Link to="/" className="tracking-wide">
         Fast Pizza .c
       </Link>
 
-      <UserName />
-
       <SearchOrder />
+
+      <UserName />
     </div>
   );
 }
