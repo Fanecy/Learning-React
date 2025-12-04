@@ -1,0 +1,33 @@
+import Account from "./pages/Account";
+import Dashborad from "./pages/Dashboard";
+
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import NewUsers from "./pages/Users";
+import Settings from "./pages/Settings";
+import Login from "./pages/Login";
+import Cabins from "./pages/Cabins";
+import Bookings from "./pages/Bookings";
+import PageNotFound from "./pages/PageNotFound";
+import GlobalStyles from "./styles/GlobalStyles.css";
+
+function App() {
+  return (
+    <>
+      <GlobalStyles />
+      <BrowserRouter>
+        <Routes>
+          <Route index element={<Navigate replace to="dashbroad" />} />
+          <Route path="dashboard" element={<Dashborad />} />
+          <Route path="users" element={<NewUsers />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="login" element={<Login />} />
+          <Route path="cabins" element={<Cabins />} />
+          <Route path="bookings" element={<Bookings />} />
+          <Route path="account" element={<Account />} />
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+}
+export default App;
