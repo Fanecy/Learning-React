@@ -20,3 +20,17 @@ export async function deleteCabins(id) {
 
   return data;
 }
+
+export async function addCabins(newCabin) {
+  const { data, error } = await supabase
+    .from("cabins")
+    .insert([newCabin])
+    .select();
+
+  if (error) {
+    console.error("创建小屋错误", error);
+    throw new Error("创建小屋错误", error.message);
+  }
+
+  return data;
+}
