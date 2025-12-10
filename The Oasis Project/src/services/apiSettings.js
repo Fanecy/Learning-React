@@ -5,7 +5,7 @@ export async function getSettings() {
 
   if (error) {
     console.error(error);
-    throw new Error("Settings could not be loaded");
+    throw new Error("获取设置出错!");
   }
   return data;
 }
@@ -15,13 +15,13 @@ export async function updateSetting(newSetting) {
   const { data, error } = await supabase
     .from("settings")
     .update(newSetting)
-    // There is only ONE row of settings, and it has the ID=1, and so this is the updated one
+    // 为什么Single：There is only ONE row of settings, and it has the ID=1, and so this is the updated one
     .eq("id", 1)
     .single();
 
   if (error) {
     console.error(error);
-    throw new Error("Settings could not be updated");
+    throw new Error("设置保存出错！");
   }
   return data;
 }

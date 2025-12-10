@@ -1,8 +1,16 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
-import { deleteCabins } from "../../services/apiCabins";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { useState } from "react";
+import CreateCabinForm from "./CreateCabinForm";
+import useDeleteCabin from "./useDeleteCabin";
+import { HiPencil, HiTrash } from "react-icons/hi";
+import { HiSquare2Stack } from "react-icons/hi2";
+import useCreateCabin from "./useCreateCabin";
+
+const FullWidth = styled.div`
+  grid-column: 1 / -1;
+  padding: 1.6rem 0;
+`;
 
 const TableRow = styled.div`
   display: grid;
@@ -46,28 +54,51 @@ const Discount = styled.div`
 function CabinRow({ cabin }) {
   const { id, name, maxCapacity, regularPrice, discount, image } = cabin;
 
-  const queryClient = useQueryClient();
+  const [showEdit, setShowEdit] = useState(false);
 
-  const { status, mutate } = useMutation({
-    mutationFn: (id) => deleteCabins(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cabin"],
-      }),
-        toast.success("删除小屋成功!");
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  const { status, deleteCabin } = useDeleteCabin();
+
+  const { statusCreate, mutateCreate } = useCreateCabin();
+
+  const trueStatus = status === "loading" || statusCreate === "loading";
+
+  function handleDuplicate() {
+    mutateCreate({
+      name: `${name}的复制`,
+      maxCapacity,
+      regularPrice,
+      discount,
+      image,
+    });
+  }
   return (
     <TableRow>
       <Img src={image} />
       <Cabin>{name}</Cabin>
       <div>Fill up to {maxCapacity} guests</div>
       <Price>{formatCurrency(regularPrice)}</Price>
-      <Discount>{formatCurrency(discount)}</Discount>
-      <button disabled={status === "loading"} onClick={() => mutate(id)}>
-        delete
-      </button>
+      {discount ? (
+        <Discount>{formatCurrency(discount)}</Discount>
+      ) : (
+        <span>&mdash;</span>
+      )}
+      <div>
+        <button disabled={trueStatus} onClick={handleDuplicate}>
+          <HiSquare2Stack />
+        </button>
+        <button
+          disabled={trueStatus}
+          onClick={() => setShowEdit((show) => !show)}
+        >
+          <HiPencil />
+        </button>
+        <button disabled={trueStatus} onClick={() => deleteCabin(id)}>
+          <HiTrash />
+        </button>
+      </div>
+      <FullWidth>
+        {showEdit && <CreateCabinForm cabinToEdit={cabin} />}
+      </FullWidth>
     </TableRow>
   );
 }

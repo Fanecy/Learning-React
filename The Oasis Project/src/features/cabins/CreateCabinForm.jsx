@@ -1,118 +1,125 @@
-import styled from "styled-components";
-
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addCabins } from "../../services/apiCabins";
-import toast from "react-hot-toast";
+import RowForm from "../../ui/RowForm";
+import useCreateCabin from "./useCreateCabin";
+import useEditCabin from "./useEditCabin";
 
-const FormRow = styled.div`
-  display: grid;
-  align-items: center;
-  grid-template-columns: 24rem 1fr 1.2fr;
-  gap: 2.4rem;
+function CreateCabinForm({ cabinToEdit = {} }) {
+  const { id: editId, ...editValues } = cabinToEdit;
+  const onEdit = Boolean(cabinToEdit.id);
 
-  padding: 1.2rem 0;
-
-  &:first-child {
-    padding-top: 0;
-  }
-
-  &:last-child {
-    padding-bottom: 0;
-  }
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-
-  &:has(button) {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1.2rem;
-  }
-`;
-
-const Label = styled.label`
-  font-weight: 500;
-`;
-
-const Error = styled.span`
-  font-size: 1.4rem;
-  color: var(--color-red-700);
-`;
-
-function CreateCabinForm() {
-  const { register, handleSubmit, reset } = useForm();
-  const queryClient = useQueryClient();
-
-  const { status, mutate } = useMutation({
-    mutationFn: (data) => addCabins(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: "cabin" });
-      toast.success("创建小屋成功！");
-      reset();
-    },
-    onError: (err) => toast.error(err.message),
+  const { register, handleSubmit, reset, getValues, formState } = useForm({
+    defaultValues: onEdit ? editValues : { discount: 0 },
   });
 
+  const { errors } = formState;
+
+  const { status: statusCreate, mutate: mutateCreate } = useCreateCabin();
+
+  const { status: statusEdit, mutate: mutateEdit } = useEditCabin();
+
+  const isWorking = statusCreate === "loading" || statusEdit === "loading";
+
   function onSubmit(data) {
-    mutate(data);
+    const image = typeof data.image === "string" ? data.image : data.image[0];
+    if (onEdit)
+      mutateEdit(
+        { cabinData: { ...data, image: image }, cabinId: editId },
+        { onSuccess: () => reset() }
+      );
+    else mutateCreate({ ...data, image }, { onSuccess: () => reset() });
+  }
+
+  function onError(error) {
+    console.log(error);
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
-      <FormRow>
-        <Label htmlFor="name">Cabin name</Label>
-        <Input type="text" id="name" {...register("name")} />
-      </FormRow>
+    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+      <RowForm label="Cabin name" error={errors?.name?.message}>
+        <Input
+          type="text"
+          id="name"
+          disabled={isWorking}
+          {...register("name", { required: "这个匹配项未填充!" })}
+        />
+      </RowForm>
 
-      <FormRow>
-        <Label htmlFor="maxCapacity">Maximum capacity</Label>
-        <Input type="number" id="maxCapacity" {...register("maxCapacity")} />
-      </FormRow>
+      <RowForm label="Maximum capacity" error={errors?.maxCapacity?.message}>
+        <Input
+          type="number"
+          id="maxCapacity"
+          disabled={isWorking}
+          {...register("maxCapacity", {
+            required: "这个匹配项未填充!",
+            min: {
+              value: 1,
+              message: "最大容量至少要是1!",
+            },
+          })}
+        />
+      </RowForm>
 
-      <FormRow>
-        <Label htmlFor="regularPrice">Regular price</Label>
-        <Input type="number" id="regularPrice" {...register("regularPrice")} />
-      </FormRow>
+      <RowForm label="Regular price" error={errors?.regularPrice?.message}>
+        <Input
+          type="number"
+          id="regularPrice"
+          disabled={isWorking}
+          {...register("regularPrice", {
+            required: "这个匹配项未填充!",
+            min: {
+              value: 1,
+              message: "价格不能为0！",
+            },
+          })}
+        />
+      </RowForm>
 
-      <FormRow>
-        <Label htmlFor="discount">Discount</Label>
+      <RowForm label="Discount" error={errors?.discount?.message}>
         <Input
           type="number"
           id="discount"
-          defaultValue={0}
-          {...register("discount")}
+          disabled={isWorking}
+          {...register("discount", {
+            required: "这个匹配项未填充!",
+            validate: (value) =>
+              value <= getValues().regularPrice || "折扣不能大于价格！",
+          })}
         />
-      </FormRow>
+      </RowForm>
 
-      <FormRow>
-        <Label htmlFor="description">Description for website</Label>
+      <RowForm
+        label="Description for website"
+        error={errors?.description?.message}
+      >
         <Textarea
-          type="number"
           id="description"
-          defaultValue=""
-          {...register("description")}
+          disabled={isWorking}
+          {...register("description", { required: "这个匹配项未填充!" })}
         />
-      </FormRow>
+      </RowForm>
 
-      <FormRow>
-        <Label htmlFor="image">Cabin photo</Label>
-        <FileInput id="image" accept="image/*" {...register("image")} />
-      </FormRow>
+      <RowForm label="Cabin photo" error={errors?.image?.message}>
+        <FileInput
+          id="image"
+          accept="image/*"
+          disabled={isWorking}
+          {...register("image", {
+            required: onEdit ? false : "注意：您还未选择文件!",
+          })}
+        />
+      </RowForm>
 
-      <FormRow>
-        {/* type is an HTML attribute! */}
+      <RowForm>
         <Button variation="secondary" type="reset">
           Cancel
         </Button>
-        <Button>Add cabin</Button>
-      </FormRow>
+        <Button>{onEdit ? "编辑" : "增加"}</Button>
+      </RowForm>
     </Form>
   );
 }
