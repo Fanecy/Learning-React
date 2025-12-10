@@ -8,7 +8,7 @@ import RowForm from "../../ui/RowForm";
 import useCreateCabin from "./useCreateCabin";
 import useEditCabin from "./useEditCabin";
 
-function CreateCabinForm({ cabinToEdit = {} }) {
+function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
   const { id: editId, ...editValues } = cabinToEdit;
   const onEdit = Boolean(cabinToEdit.id);
 
@@ -39,7 +39,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      type={onCloseModal ? "modal" : "regular"}
+    >
       <RowForm label="Cabin name" error={errors?.name?.message}>
         <Input
           type="text"
@@ -115,10 +118,14 @@ function CreateCabinForm({ cabinToEdit = {} }) {
       </RowForm>
 
       <RowForm>
-        <Button variation="secondary" type="reset">
-          Cancel
+        <Button
+          variation="secondary"
+          type="reset"
+          onClick={() => onCloseModal?.()}
+        >
+          取消
         </Button>
-        <Button>{onEdit ? "编辑" : "增加"}</Button>
+        <Button>{onEdit ? "编辑" : "创建"}</Button>
       </RowForm>
     </Form>
   );
