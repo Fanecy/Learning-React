@@ -1,28 +1,14 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
-import { useState } from "react";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 import CreateCabinForm from "./CreateCabinForm";
 import useDeleteCabin from "./useDeleteCabin";
 import { HiPencil, HiTrash } from "react-icons/hi";
 import { HiSquare2Stack } from "react-icons/hi2";
 import useCreateCabin from "./useCreateCabin";
-
-const FullWidth = styled.div`
-  grid-column: 1 / -1;
-  padding: 1.6rem 0;
-`;
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-  column-gap: 2.4rem;
-  align-items: center;
-  padding: 1.4rem 2.4rem;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-`;
+import Modal from "../../ui/Modal";
+import Table from "../../ui/Table";
+import Menus from "../../ui/Menus";
 
 const Img = styled.img`
   display: block;
@@ -52,9 +38,14 @@ const Discount = styled.div`
 `;
 
 function CabinRow({ cabin }) {
-  const { id, name, maxCapacity, regularPrice, discount, image } = cabin;
-
-  const [showEdit, setShowEdit] = useState(false);
+  const {
+    id: cabinId,
+    name,
+    maxCapacity,
+    regularPrice,
+    discount,
+    image,
+  } = cabin;
 
   const { status, deleteCabin } = useDeleteCabin();
 
@@ -71,8 +62,10 @@ function CabinRow({ cabin }) {
       image,
     });
   }
+
+  /*   columns={"0.6fr 1.8fr 2.2fr 1fr 1fr 1fr"} */
   return (
-    <TableRow>
+    <Table.Row>
       <Img src={image} />
       <Cabin>{name}</Cabin>
       <div>Fill up to {maxCapacity} guests</div>
@@ -86,20 +79,44 @@ function CabinRow({ cabin }) {
         <button disabled={trueStatus} onClick={handleDuplicate}>
           <HiSquare2Stack />
         </button>
-        <button
-          disabled={trueStatus}
-          onClick={() => setShowEdit((show) => !show)}
-        >
-          <HiPencil />
-        </button>
-        <button disabled={trueStatus} onClick={() => deleteCabin(id)}>
-          <HiTrash />
-        </button>
+
+        <Modal>
+          <Modal.Open opens="edit-form">
+            <button disabled={trueStatus}>
+              <HiPencil />
+            </button>
+          </Modal.Open>
+          <Modal.Window name="edit-form">
+            <CreateCabinForm cabinToEdit={cabin} />
+          </Modal.Window>
+        </Modal>
+
+        <Modal>
+          <Modal.Open opens="delete-form">
+            <button disabled={trueStatus}>
+              <HiTrash />
+            </button>
+          </Modal.Open>
+          <Modal.Window name="delete-form">
+            <ConfirmDelete
+              resourceName={name}
+              disabled={trueStatus}
+              onConfirm={() => deleteCabin(cabinId)}
+            />
+          </Modal.Window>
+        </Modal>
+
+        <Menus.Menu>
+          <Menus.Toggle id={cabinId} />
+
+          <Menu.List id={cabinId}>
+            <Menu.Button>复制</Menu.Button>
+            <Menu.Button>编辑</Menu.Button>
+            <Menu.Button>删除</Menu.Button>
+          </Menu.List>
+        </Menus.Menu>
       </div>
-      <FullWidth>
-        {showEdit && <CreateCabinForm cabinToEdit={cabin} />}
-      </FullWidth>
-    </TableRow>
+    </Table.Row>
   );
 }
 

@@ -18,9 +18,9 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
   const { errors } = formState;
 
-  const { status: statusCreate, mutate: mutateCreate } = useCreateCabin();
+  const { statusCreate, mutateCreate } = useCreateCabin();
 
-  const { status: statusEdit, mutate: mutateEdit } = useEditCabin();
+  const { statusEdit, mutateEdit } = useEditCabin();
 
   const isWorking = statusCreate === "loading" || statusEdit === "loading";
 
