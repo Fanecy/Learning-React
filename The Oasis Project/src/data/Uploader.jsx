@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { isFuture, isPast, isToday } from "date-fns";
-import supabase from "../services/supabase";
+import supabase from "../services/supaBase";
 import Button from "../ui/Button";
 import { subtractDates } from "../utils/helpers";
 
@@ -8,13 +8,7 @@ import { bookings } from "./data-bookings";
 import { cabins } from "./data-cabins";
 import { guests } from "./data-guests";
 
-// const originalSettings = {
-//   minBookingLength: 3,
-//   maxBookingLength: 30,
-//   maxGuestsPerBooking: 10,
-//   breakfastPrice: 15,
-// };
-
+// --- 建议添加一些简单的日志函数，方便调试 ---
 async function deleteGuests() {
   const { error } = await supabase.from("guests").delete().gt("id", 0);
   if (error) console.log(error.message);
@@ -41,28 +35,32 @@ async function createCabins() {
 }
 
 async function createBookings() {
-  // Bookings need a guestId and a cabinId. We can't tell Supabase IDs for each object, it will calculate them on its own. So it might be different for different people, especially after multiple uploads. Therefore, we need to first get all guestIds and cabinIds, and then replace the original IDs in the booking data with the actual ones from the DB
+  // 1. 获取数据库中真实的 ID
   const { data: guestsIds } = await supabase
     .from("guests")
     .select("id")
     .order("id");
   const allGuestIds = guestsIds.map((cabin) => cabin.id);
+
   const { data: cabinsIds } = await supabase
     .from("cabins")
     .select("id")
     .order("id");
   const allCabinIds = cabinsIds.map((cabin) => cabin.id);
 
+  // 2. 映射数据，严格对应你的截图列名
   const finalBookings = bookings.map((booking) => {
-    // Here relying on the order of cabins, as they don't have and ID yet
     const cabin = cabins.at(booking.cabinId - 1);
+
+    // 计算天数和价格
     const numNights = subtractDates(booking.endDate, booking.startDate);
     const cabinPrice = numNights * (cabin.regularPrice - cabin.discount);
     const extrasPrice = booking.hasBreakfast
       ? numNights * 15 * booking.numGuests
-      : 0; // hardcoded breakfast price
+      : 0;
     const totalPrice = cabinPrice + extrasPrice;
 
+    // 计算状态
     let status;
     if (
       isPast(new Date(booking.endDate)) &&
@@ -82,22 +80,47 @@ async function createBookings() {
     )
       status = "checked-in";
 
+    // 3. 构建最终对象 (KEY 必须严格等于数据库列名)
     return {
-      ...booking,
-      numNights,
-      cabinPrice,
-      extrasPrice,
-      totalPrice,
-      guestId: allGuestIds.at(booking.guestId - 1),
-      cabinId: allCabinIds.at(booking.cabinId - 1),
-      status,
+      // 直接映射的字段
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      numGuests: booking.numGuests,
+      totalPrice: totalPrice,
+      status: status,
+      hasBreakfast: booking.hasBreakfast,
+      isPaid: booking.isPaid,
+      observations: booking.observations,
+
+      // *** 需要改名的字段 (根据你的截图) ***
+
+      // 1. 数据库叫 numOfNights (代码算出来叫 numNights)
+      numOfNights: numNights,
+
+      // 2. 数据库叫 extraPrice (代码算出来叫 extrasPrice)
+      extraPrice: extrasPrice,
+
+      // 3. 数据库叫 cabinPrice (确认一致)
+      cabinPrice: cabinPrice,
+
+      // 4. 数据库叫 guestID (注意大写的 ID)
+      guestID: allGuestIds.at(booking.guestId - 1),
+
+      // 5. 数据库叫 cabinID (注意大写的 ID)
+      cabinID: allCabinIds.at(booking.cabinId - 1),
     };
   });
 
-  console.log(finalBookings);
+  console.log("准备上传的数据:", finalBookings);
 
   const { error } = await supabase.from("bookings").insert(finalBookings);
-  if (error) console.log(error.message);
+  if (error) {
+    console.error("上传 Bookings 失败:", error.message);
+    // 如果失败，抛出 alert 方便看见
+    alert(`上传失败: ${error.message}`);
+  } else {
+    console.log("Bookings 上传成功！");
+  }
 }
 
 function Uploader() {

@@ -76,38 +76,45 @@ function CabinRow({ cabin }) {
         <span>&mdash;</span>
       )}
       <div>
+        <button disabled={trueStatus} onClick={handleDuplicate}>
+          <HiSquare2Stack />
+        </button>
+
         <Modal>
-          <Menus.Menu>
-            <Menus.Toggle id={cabinId} />
-
-            <Menus.List id={cabinId}>
-              <Menus.Button
-                icon={<HiSquare2Stack />}
-                onClick={() => deleteCabin()}
-              >
-                复制
-              </Menus.Button>
-              <Modal.Open opens="edit-form">
-                <Menus.Button icon={<HiPencil />}>编辑</Menus.Button>
-              </Modal.Open>
-              <Modal.Open opens="delete-form">
-                <Menus.Button icon={<HiTrash />}>删除</Menus.Button>
-              </Modal.Open>
-            </Menus.List>
-
-            <Modal.Window name="edit-form">
-              <CreateCabinForm cabinToEdit={cabin} />
-            </Modal.Window>
-
-            <Modal.Window name="delete-form">
-              <ConfirmDelete
-                resourceName={name}
-                disabled={trueStatus}
-                onConfirm={() => deleteCabin(cabinId)}
-              />
-            </Modal.Window>
-          </Menus.Menu>
+          <Modal.Open opens="edit-form">
+            <button disabled={trueStatus}>
+              <HiPencil />
+            </button>
+          </Modal.Open>
+          <Modal.Window name="edit-form">
+            <CreateCabinForm cabinToEdit={cabin} />
+          </Modal.Window>
         </Modal>
+
+        <Modal>
+          <Modal.Open opens="delete-form">
+            <button disabled={trueStatus}>
+              <HiTrash />
+            </button>
+          </Modal.Open>
+          <Modal.Window name="delete-form">
+            <ConfirmDelete
+              resourceName={name}
+              disabled={trueStatus}
+              onConfirm={() => deleteCabin(cabinId)}
+            />
+          </Modal.Window>
+        </Modal>
+
+        <Menus.Menu>
+          <Menus.Toggle id={cabinId} />
+
+          <Menus.List id={cabinId}>
+            <Menus.Button icon={<HiSquare2Stack />}>复制</Menus.Button>
+            <Menus.Button icon={<HiPencil />}>编辑</Menus.Button>
+            <Menus.Button icon={<HiTrash />}>删除</Menus.Button>
+          </Menus.List>
+        </Menus.Menu>
       </div>
     </Table.Row>
   );
