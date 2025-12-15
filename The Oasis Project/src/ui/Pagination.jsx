@@ -1,4 +1,7 @@
 import styled from "styled-components";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { useSearchParams } from "react-router-dom";
+import { PAGE_SIZE } from "../utils/constants";
 
 const StyledPagination = styled.div`
   width: 100%;
@@ -55,3 +58,55 @@ const PaginationButton = styled.button`
     color: var(--color-brand-50);
   }
 `;
+
+function Pagination({ count }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentPage = !searchParams.get("page")
+    ? 1
+    : Number(searchParams.get("page"));
+
+  const pageCount = Math.ceil(count / PAGE_SIZE);
+
+  function NextPage() {
+    const next = currentPage === pageCount ? currentPage : currentPage + 1;
+    searchParams.set("page", next);
+    setSearchParams(searchParams);
+  }
+
+  function PrevPage() {
+    const prev = currentPage === 1 ? 1 : currentPage - 1;
+    searchParams.set("page", prev);
+    setSearchParams(searchParams);
+  }
+
+  if (count <= PAGE_SIZE) return null;
+  return (
+    <StyledPagination>
+      <P>
+        展示<span>{(currentPage - 1) * PAGE_SIZE + 1}</span>到
+        <span>
+          {PAGE_SIZE * currentPage >= count ? count : PAGE_SIZE * currentPage}
+        </span>
+        个结果 共<span>{count}</span>
+        个结果
+      </P>
+      <Buttons>
+        <PaginationButton onClick={PrevPage} disabled={currentPage === 1}>
+          <HiChevronLeft />
+          <span>上一页</span>
+        </PaginationButton>
+
+        <PaginationButton
+          onClick={NextPage}
+          disabled={currentPage === pageCount}
+        >
+          <span>下一页</span>
+          <HiChevronRight />
+        </PaginationButton>
+      </Buttons>
+    </StyledPagination>
+  );
+}
+
+export default Pagination;
