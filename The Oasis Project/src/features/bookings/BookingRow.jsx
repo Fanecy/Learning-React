@@ -10,6 +10,15 @@ import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
 import { HiEye } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import {
+  HiArrowTurnDownLeft,
+  HiArrowTurnDownRight,
+  HiTrash,
+} from "react-icons/hi2";
+import useCheckout from "../check-in-out/useCheckout";
+import useDeleteBooking from "./useDeleteBooking";
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -60,6 +69,10 @@ function BookingRow({
 
   const navigate = useNavigate();
 
+  const { checkoutMutate, checkoutStatus } = useCheckout();
+
+  const { deleteMutate, deleteStatus } = useDeleteBooking();
+
   return (
     <Table.Row>
       <Cabin>{cabinName}</Cabin>
@@ -85,18 +98,52 @@ function BookingRow({
       <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
 
       <Amount>{formatCurrency(totalPrice)}</Amount>
+      <Modal>
+        <Menus.Menu>
+          <Menus.Toggle id={bookingId} />
+          <Menus.List id={bookingId}>
+            <Menus.Button
+              icon={<HiEye />}
+              onClick={() => navigate(`/bookings/${bookingId}`)}
+            >
+              查看更多
+            </Menus.Button>
 
-      <Menus.Menu>
-        <Menus.Toggle id={bookingId} />
-        <Menus.List id={bookingId}>
-          <Menus.Button
-            icon={<HiEye />}
-            onClick={() => navigate(`/bookings/${bookingId}`)}
-          >
-            查看更多
-          </Menus.Button>
-        </Menus.List>
-      </Menus.Menu>
+            {status === "unconfirmed" && (
+              <Menus.Button
+                icon={<HiArrowTurnDownLeft />}
+                onClick={() => navigate(`/checkin/${bookingId}`)}
+              >
+                登记入住
+              </Menus.Button>
+            )}
+
+            {status === "checked-in" && (
+              <Menus.Button
+                icon={<HiArrowTurnDownRight />}
+                onClick={() => {
+                  checkoutMutate({ bookingId });
+                }}
+                disabled={checkoutStatus === "loading"}
+              >
+                退房登记
+              </Menus.Button>
+            )}
+
+            <Modal.Open opens="delete">
+              <Menus.Button icon={<HiTrash />}>删除信息</Menus.Button>
+            </Modal.Open>
+          </Menus.List>
+        </Menus.Menu>
+
+        <Modal.Window name="delete">
+          <ConfirmDelete
+            resourceName={guestName}
+            disabled={deleteStatus === "loading"}
+            onConfirm={() => deleteMutate(bookingId)}
+          />
+        </Modal.Window>
+      </Modal>
     </Table.Row>
   );
 }

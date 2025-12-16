@@ -83,7 +83,7 @@ function CabinRow({ cabin }) {
             <Menus.List id={cabinId}>
               <Menus.Button
                 icon={<HiSquare2Stack />}
-                onClick={() => deleteCabin()}
+                onClick={() => handleDuplicate()}
               >
                 复制
               </Menus.Button>

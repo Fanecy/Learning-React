@@ -11,6 +11,12 @@ import ButtonText from "../../ui/ButtonText";
 import { useMoveBack } from "../../hooks/useMoveBack";
 import useBooking from "./useBooking";
 import Spinner from "../../ui/Spinner";
+import { useNavigate } from "react-router-dom";
+import useCheckout from "../check-in-out/useCheckout";
+import Modal from "../../ui/Modal";
+import { HiTrash } from "react-icons/hi2";
+import ConfirmDelete from "../../ui/ConfirmDelete";
+import useDeleteBooking from "./useDeleteBooking";
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -20,11 +26,15 @@ const HeadingGroup = styled.div`
 
 function BookingDetail() {
   const { booking, isLoading } = useBooking();
-  const status = "checked-in";
+  const { checkoutMutate, checkoutStatus } = useCheckout();
+  const { deleteMutate, deleteStatus } = useDeleteBooking();
+
+  const navigate = useNavigate();
 
   const moveBack = useMoveBack();
 
   if (isLoading) return <Spinner />;
+  const { id: bookingId, status: bookingStatus } = booking;
 
   const statusToTagName = {
     unconfirmed: "blue",
@@ -37,7 +47,9 @@ function BookingDetail() {
       <Row type="horizontal">
         <HeadingGroup>
           <Heading as="h1">Booking #{booking.cabinID}</Heading>
-          <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
+          <Tag type={statusToTagName[bookingStatus]}>
+            {bookingStatus.replace("-", " ")}
+          </Tag>
         </HeadingGroup>
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>
@@ -46,8 +58,41 @@ function BookingDetail() {
 
       <ButtonGroup>
         <Button variation="secondary" onClick={moveBack}>
-          Back
+          返回
         </Button>
+
+        <Modal>
+          <Modal.Open opens={"delete"}>
+            <Button variation={"danger"} icon={<HiTrash />}>
+              删除信息
+            </Button>
+          </Modal.Open>
+
+          <Modal.Window name="delete">
+            <ConfirmDelete
+              resourceName={bookingId}
+              disabled={deleteStatus === "loading"}
+              onConfirm={() => deleteMutate(bookingId)}
+            />
+          </Modal.Window>
+        </Modal>
+
+        {bookingStatus === "unconfirmed" && (
+          <Button onClick={() => navigate(`/checkin/${bookingId}`)}>
+            登记入住
+          </Button>
+        )}
+
+        {bookingStatus === "checked-in" && (
+          <Button
+            onClick={() => {
+              checkoutMutate({ bookingId });
+            }}
+            disabled={checkoutStatus === "loading"}
+          >
+            退房登记
+          </Button>
+        )}
       </ButtonGroup>
     </>
   );

@@ -125,14 +125,14 @@ function BookingDataBox({ booking }) {
         <div>
           <HiOutlineHomeModern />
           <p>
-            {numOfNights} nights in Cabin <span>{cabinName}</span>
+            {numOfNights} 晚在小屋 <span>{cabinName}</span>
           </p>
         </div>
 
         <p>
           {format(new Date(startDate), "EEE, MMM dd yyyy")} (
           {isToday(new Date(startDate))
-            ? "Today"
+            ? "今天"
             : formatDistanceFromNow(startDate)}
           ) &mdash; {format(new Date(endDate), "EEE, MMM dd yyyy")}
         </p>
@@ -142,43 +142,40 @@ function BookingDataBox({ booking }) {
         <Guest>
           {countryFlag && <Flag src={countryFlag} alt={`Flag of ${country}`} />}
           <p>
-            {guestName} {numGuests > 1 ? `+ ${numGuests - 1} guests` : ""}
+            {guestName} {numGuests > 1 ? `+ ${numGuests - 1} 位客人` : ""}
           </p>
           <span>&bull;</span>
           <p>{email}</p>
           <span>&bull;</span>
-          <p>National ID {nationalID}</p>
+          <p>身份证号 {nationalID}</p>
         </Guest>
 
         {observations && (
-          <DataItem
-            icon={<HiOutlineChatBubbleBottomCenterText />}
-            label="Observations"
-          >
+          <DataItem icon={<HiOutlineChatBubbleBottomCenterText />} label="备注">
             {observations}
           </DataItem>
         )}
 
-        <DataItem icon={<HiOutlineCheckCircle />} label="Breakfast included?">
-          {hasBreakfast ? "Yes" : "No"}
+        <DataItem icon={<HiOutlineCheckCircle />} label="含早餐？">
+          {hasBreakfast ? "是" : "否"}
         </DataItem>
 
         <Price isPaid={isPaid}>
-          <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
+          <DataItem icon={<HiOutlineCurrencyDollar />} label={`总价`}>
             {formatCurrency(totalPrice)}
 
             {hasBreakfast &&
-              ` (${formatCurrency(
-                cabinPrice
-              )} cabin + ${formatCurrency()} breakfast)`}
+              ` (${formatCurrency(cabinPrice)} 小屋 + ${formatCurrency(
+                extraPrice
+              )} 早餐)`}
           </DataItem>
 
-          <p>{isPaid ? "Paid" : "Will pay at property"}</p>
+          <p>{isPaid ? "已支付" : "到店支付"}</p>
         </Price>
       </Section>
 
       <Footer>
-        <p>Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p>
+        <p>预订于 {format(new Date(created_at), "EEE, MMM dd yyyy, p")}</p>
       </Footer>
     </StyledBookingDataBox>
   );
