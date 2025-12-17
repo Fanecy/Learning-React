@@ -1,64 +1,58 @@
 import { useForm } from "react-hook-form";
 import Button from "../../ui/Button";
 import Form from "../../ui/Form";
-import FormRow from "../../ui/FormRow";
+import RowForm from "../../ui/RowForm";
 import Input from "../../ui/Input";
 
-import { useUpdateUser } from "./useUpdateUser";
+import useUpdateUser from "./useUpdateUser";
 
 function UpdatePasswordForm() {
   const { register, handleSubmit, formState, getValues, reset } = useForm();
   const { errors } = formState;
 
-  const { updateUser, isUpdating } = useUpdateUser();
+  const { statusUpdateUser, mutateUpdateUser } = useUpdateUser();
 
   function onSubmit({ password }) {
-    updateUser({ password }, { onSuccess: reset });
+    mutateUpdateUser({ password }, { onSuccess: reset });
   }
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <FormRow
-        label="Password (min 8 characters)"
-        error={errors?.password?.message}
-      >
+      <RowForm label="密码（至少8个字符）" error={errors?.password?.message}>
         <Input
           type="password"
           id="password"
           autoComplete="current-password"
-          disabled={isUpdating}
+          disabled={statusUpdateUser === "loading"}
           {...register("password", {
-            required: "This field is required",
+            required: "此字段为必填项",
             minLength: {
               value: 8,
-              message: "Password needs a minimum of 8 characters",
+              message: "密码至少需要8个字符",
             },
           })}
         />
-      </FormRow>
+      </RowForm>
 
-      <FormRow
-        label="Confirm password"
-        error={errors?.passwordConfirm?.message}
-      >
+      <RowForm label="确认密码" error={errors?.passwordConfirm?.message}>
         <Input
           type="password"
           autoComplete="new-password"
           id="passwordConfirm"
-          disabled={isUpdating}
+          disabled={statusUpdateUser === "loading"}
           {...register("passwordConfirm", {
-            required: "This field is required",
+            required: "此字段为必填项",
             validate: (value) =>
-              getValues().password === value || "Passwords need to match",
+              getValues().password === value || "两次输入的密码不一致",
           })}
         />
-      </FormRow>
-      <FormRow>
+      </RowForm>
+      <RowForm>
         <Button onClick={reset} type="reset" variation="secondary">
-          Cancel
+          取消
         </Button>
-        <Button disabled={isUpdating}>Update password</Button>
-      </FormRow>
+        <Button disabled={statusUpdateUser === "loading"}>更新密码</Button>
+      </RowForm>
     </Form>
   );
 }

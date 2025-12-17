@@ -10,7 +10,7 @@ function CabinTable() {
 
   const [searchParams] = useSearchParams();
 
-  const searchValue = searchParams.get("discount") || "name-asc";
+  const searchValue = searchParams.get("discount") || "all";
 
   if (isLoading) return <Spinner />;
 

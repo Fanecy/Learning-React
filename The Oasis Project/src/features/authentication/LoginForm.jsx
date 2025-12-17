@@ -3,16 +3,26 @@ import Button from "../../ui/Button";
 import Form from "../../ui/Form";
 import Input from "../../ui/Input";
 import FormRowVertical from "../../ui/FormRowVertical";
+import useLogin from "./useLogin";
+import SpinnerMini from "../../ui/SpinnerMini";
 
 function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("1308840793@qq.com");
+  const [password, setPassword] = useState("456852");
 
-  function handleSubmit() {}
+  const { loginMutate, loginStatus } = useLogin();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!email || !password) return;
+
+    loginMutate({ email, password });
+  }
 
   return (
     <Form onSubmit={handleSubmit}>
-      <FormRowVertical label="Email address">
+      <FormRowVertical label="邮箱">
         <Input
           type="email"
           id="email"
@@ -20,19 +30,23 @@ function LoginForm() {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={loginStatus === "loading"}
         />
       </FormRowVertical>
-      <FormRowVertical label="Password">
+      <FormRowVertical label="密码">
         <Input
           type="password"
           id="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          disabled={loginStatus === "loading"}
         />
       </FormRowVertical>
       <FormRowVertical>
-        <Button size="large">Login</Button>
+        <Button size="large">
+          {loginStatus !== "loading" ? "登录" : <SpinnerMini />}
+        </Button>
       </FormRowVertical>
     </Form>
   );

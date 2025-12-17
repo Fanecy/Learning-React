@@ -8,9 +8,9 @@ function CabinOperation() {
       <Filter
         filterField={"discount"}
         options={[
-          { value: "all", lable: "全部" },
-          { value: "no-discount", lable: "未打折" },
-          { value: "with-discount", lable: "优惠" },
+          { value: "all", label: "全部" },
+          { value: "no-discount", label: "未打折" },
+          { value: "with-discount", label: "优惠" },
         ]}
       />
 
