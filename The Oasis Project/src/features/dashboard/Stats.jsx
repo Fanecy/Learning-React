@@ -19,32 +19,33 @@ function Stats({ bookings, confirmedStays, numDays, cabinCount }) {
 
   // 4.
   const occupation =
-    confirmedStays.reduce((acc, cur) => acc + cur.numNights, 0) /
+    confirmedStays.reduce((acc, cur) => acc + cur.numOfNights, 0) /
     (numDays * cabinCount);
+
   // num checked in nights / all available nights (num days * num cabins)
 
   return (
     <>
       <Stat
-        title="Bookings"
+        title="预订量"
         color="blue"
         icon={<HiOutlineBriefcase />}
         value={numBookings}
       />
       <Stat
-        title="Sales"
+        title="销售额"
         color="green"
         icon={<HiOutlineBanknotes />}
         value={formatCurrency(sales)}
       />
       <Stat
-        title="Check ins"
+        title="入住数"
         color="indigo"
         icon={<HiOutlineCalendarDays />}
         value={checkins}
       />
       <Stat
-        title="Occupancy rate"
+        title="入住率"
         color="yellow"
         icon={<HiOutlineChartBar />}
         value={Math.round(occupation * 100) + "%"}
