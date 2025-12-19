@@ -12,7 +12,7 @@ function useCheckout() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["booking"] });
       toast.success("退房成功！");
-      navigate("-1");
+      navigate(-1);
     },
     onError: () => {
       toast.error("退房失败,请重试！");
