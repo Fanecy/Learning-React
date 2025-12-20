@@ -1,0 +1,6 @@
+{
+  "presets": [
+    "@babel/preset-env", // 适配当前 Node.js 版本的 JS 语法
+    ["@babel/preset-react", { "runtime": "automatic" }] // 转译 JSX，自动引入 React
+  ]
+}
